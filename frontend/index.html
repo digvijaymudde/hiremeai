@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digvijay Mudde - GenAI AI Avatar & Interactive Portfolio</title>
+    <meta name="description" content="Chat directly with Digvijay Mudde's AI Avatar. B.E. in AI & Data Science candidate specializing in Generative AI, Machine Learning, Python, and Full Stack AI Apps.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="chatgpt-layout">
+
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <button class="icon-btn" id="mobile-sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="mobile-title">Digvijay Mudde • AI Avatar</div>
+        <a href="/download-resume" target="_blank" class="btn btn-sm btn-accent" download>Resume PDF</a>
+    </header>
+
+    <!-- ChatGPT Style Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="btn btn-new-chat" onclick="startNewChat()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                <span>New Chat</span>
+            </button>
+            <button class="icon-btn sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close Sidebar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Candidate Badge -->
+        <div class="candidate-badge-card">
+            <div class="candidate-avatar">DM</div>
+            <div class="candidate-info">
+                <h3>Digvijay Mudde</h3>
+                <span class="role-tag">GenAI & ML Engineer</span>
+            </div>
+        </div>
+
+        <!-- Chat History List -->
+        <div class="sidebar-section">
+            <div class="section-label">Chat History</div>
+            <div class="history-list" id="history-list">
+                <!-- Dynamically populated by script.js -->
+            </div>
+        </div>
+
+        <!-- Candidate Fast Facts -->
+        <div class="sidebar-section candidate-details">
+            <div class="section-label">Candidate Overview</div>
+            <div class="detail-item">
+                <span class="detail-icon">🎓</span>
+                <div>
+                    <strong>B.E. AI & Data Science</strong>
+                    <div class="subtext">Dr. D. Y. Patil Institute (2020-2024)</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <span class="detail-icon">⚡</span>
+                <div>
+                    <strong>Key Skills</strong>
+                    <div class="skills-mini-list">
+                        <span class="mini-skill">Python</span>
+                        <span class="mini-skill">GenAI</span>
+                        <span class="mini-skill">ML</span>
+                        <span class="mini-skill">Django</span>
+                        <span class="mini-skill">Node.js</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Footer / Action Buttons -->
+        <div class="sidebar-footer">
+            <a href="/download-resume" target="_blank" class="btn btn-secondary btn-full" download>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                <span>Download Resume PDF</span>
+            </a>
+            <a href="mailto:digvijaymudde123@gmail.com" class="btn btn-outline btn-full">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+                <span>Contact Digvijay</span>
+            </a>
+            <button class="btn btn-text btn-full text-muted" onclick="clearAllHistory()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <span>Clear Chat History</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <div class="chat-main">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-left">
+                <button class="icon-btn desktop-sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle Sidebar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+                <div class="thread-info">
+                    <span class="status-dot"></span>
+                    <span class="model-name">Digvijay Mudde AI Avatar (Groq LLaMA 3.3)</span>
+                </div>
+            </div>
+            <div class="top-right">
+                <a href="/download-resume" target="_blank" class="btn btn-sm btn-accent" download>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    <span>Download PDF Resume</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Messages Workspace -->
+        <div class="messages-container" id="messages-container">
+            <!-- Welcome View (Shown when no messages in thread) -->
+            <div class="welcome-container" id="welcome-container">
+                <div class="welcome-badge">GenAI Role Portfolio Assistant</div>
+                <h1 class="welcome-title">Ask Digvijay's AI Avatar Anything</h1>
+                <p class="welcome-subtitle">
+                    Explore my B.E. in Artificial Intelligence & Data Science, Machine Learning projects, technical stack, and suitability for Generative AI roles.
+                </p>
+
+                <!-- Suggested Recruiter Prompts Grid -->
+                <div class="prompts-grid">
+                    <button class="prompt-card" onclick="sendPrompt('What is Digvijay\'s background in GenAI and Machine Learning?')">
+                        <div class="card-icon">🧠</div>
+                        <div class="card-title">GenAI & ML Background</div>
+                        <div class="card-desc">"What is Digvijay's background in GenAI and Machine Learning?"</div>
+                    </button>
+
+                    <button class="prompt-card" onclick="sendPrompt('Tell me about your Car Price Prediction and Book Recommender projects.')">
+                        <div class="card-icon">🚀</div>
+                        <div class="card-title">Key Projects</div>
+                        <div class="card-desc">"Tell me about your Car Price Prediction & Book Recommender projects."</div>
+                    </button>
+
+                    <button class="prompt-card" onclick="sendPrompt('What are your top technical skills and education details?')">
+                        <div class="card-icon">💻</div>
+                        <div class="card-title">Technical Skills & Education</div>
+                        <div class="card-desc">"What are your top technical skills and education details?"</div>
+                    </button>
+
+                    <button class="prompt-card" onclick="sendPrompt('Why should we hire Digvijay for a Generative AI / ML role?')">
+                        <div class="card-icon">✨</div>
+                        <div class="card-title">Why Hire Digvijay?</div>
+                        <div class="card-desc">"Why should we hire Digvijay for a Generative AI / ML role?"</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Chat Thread Messages -->
+            <div class="chat-thread" id="chat-thread">
+                <!-- Dynamically rendered by script.js -->
+            </div>
+        </div>
+
+        <!-- Chat Input Fixed Container -->
+        <div class="input-container-wrap">
+            <form class="chat-input-box" id="chat-form" onsubmit="handleFormSubmit(event)">
+                <textarea 
+                    id="chat-textarea" 
+                    placeholder="Ask Digvijay about his GenAI experience, skills, projects..." 
+                    rows="1"
+                    onkeydown="handleKeyDown(event)"
+                ></textarea>
+                <button type="submit" class="send-btn" id="send-btn" aria-label="Send message">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </button>
+            </form>
+            <div class="input-disclaimer">
+                HireMe AI Candidate Avatar powered by FastAPI & Groq LLaMA 3.3. Answers are strictly grounded in candidate facts.
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

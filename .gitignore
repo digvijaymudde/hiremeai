@@ -1,0 +1,13 @@
+# Python & Virtual Environments
+.venv/
+venv/
+ENV/
+__pycache__/
+*.pyc
+
+# Environment Variables (Secrets)
+.env
+
+# Cache & Build
+parsed_resume.json
+.DS_Store
