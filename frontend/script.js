@@ -7,6 +7,186 @@ const API_BASE = (window.location.protocol === 'file:')
 let chatThreads = JSON.parse(localStorage.getItem('hireme_chat_threads')) || [];
 let currentChatId = localStorage.getItem('hireme_current_chat_id') || null;
 
+// Configure Marked.js options if available
+if (window.marked) {
+    try {
+        if (typeof window.marked.setOptions === 'function') {
+            window.marked.setOptions({
+                gfm: true,
+                breaks: true,
+                mangle: false,
+                headerIds: false
+            });
+        }
+    } catch (e) {
+        console.warn("Could not configure marked options:", e);
+    }
+}
+
+// Markdown renderer with Marked.js support and resilient standalone fallback
+function renderMarkdown(rawText) {
+    if (!rawText) return '';
+
+    // Primary: use marked library from CDN if loaded
+    if (window.marked) {
+        try {
+            if (typeof window.marked.parse === 'function') {
+                return window.marked.parse(rawText, { gfm: true, breaks: true });
+            } else if (typeof window.marked === 'function') {
+                return window.marked(rawText);
+            }
+        } catch (err) {
+            console.error("Marked parse error:", err);
+        }
+    }
+
+    // Secondary / Fallback: built-in parser
+    return parseMarkdownFallback(rawText);
+}
+
+// Standalone Markdown Fallback Parser (handles tables, bold, lists, code, headers)
+function parseMarkdownFallback(md) {
+    if (!md) return '';
+
+    // 1. Extract and store code blocks so internal formatting isn't mangled
+    const codeBlocks = [];
+    let text = md.replace(/```([\s\S]*?)```/g, (match, code) => {
+        const id = `__CODE_BLOCK_${codeBlocks.length}__`;
+        const escapedCode = code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        codeBlocks.push(`<pre><code>${escapedCode.trim()}</code></pre>`);
+        return id;
+    });
+
+    // 2. Inline code
+    text = text.replace(/`([^`]+)`/g, (match, inline) => {
+        const escaped = inline.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return `<code>${escaped}</code>`;
+    });
+
+    // 3. Bold & Italic
+    text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+    text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+    text = text.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+    text = text.replace(/(^|[^_])_([^_]+)_/g, '$1<em>$2</em>');
+
+    // 4. Headers
+    text = text.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+    text = text.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    text = text.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    text = text.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+    // 5. Links
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+    // 6. Tables and List parsing line-by-line
+    const lines = text.split('\n');
+    let output = [];
+    let inTable = false;
+    let tableHtml = '';
+    let inList = false;
+    let listType = null; // 'ul' or 'ol'
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        // Check for Markdown table row (| ... |)
+        if (line.startsWith('|') && line.endsWith('|')) {
+            // Close list if open
+            if (inList) {
+                output.push(`</${listType}>`);
+                inList = false;
+                listType = null;
+            }
+
+            // Check if delimiter row like |---|---|
+            if (/^\|[\s\-:|]+\|$/.test(line)) {
+                continue;
+            }
+
+            const cells = line.slice(1, -1).split('|').map(c => c.trim());
+            if (!inTable) {
+                inTable = true;
+                tableHtml = '<table><thead><tr>' + cells.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
+            } else {
+                tableHtml += '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+            }
+            continue;
+        } else if (inTable) {
+            tableHtml += '</tbody></table>';
+            output.push(tableHtml);
+            inTable = false;
+            tableHtml = '';
+        }
+
+        // Check for unordered list item (- item, * item, • item)
+        const ulMatch = line.match(/^[-*•]\s+(.*)/);
+        if (ulMatch) {
+            if (inList && listType !== 'ul') {
+                output.push(`</${listType}>`);
+                inList = false;
+            }
+            if (!inList) {
+                output.push('<ul>');
+                inList = true;
+                listType = 'ul';
+            }
+            output.push(`<li>${ulMatch[1]}</li>`);
+            continue;
+        }
+
+        // Check for ordered list item (1. item)
+        const olMatch = line.match(/^\d+\.\s+(.*)/);
+        if (olMatch) {
+            if (inList && listType !== 'ol') {
+                output.push(`</${listType}>`);
+                inList = false;
+            }
+            if (!inList) {
+                output.push('<ol>');
+                inList = true;
+                listType = 'ol';
+            }
+            output.push(`<li>${olMatch[1]}</li>`);
+            continue;
+        }
+
+        // Close list if line is not a list item
+        if (inList) {
+            output.push(`</${listType}>`);
+            inList = false;
+            listType = null;
+        }
+
+        // Paragraph or block tag
+        if (line.startsWith('<h') || line.startsWith('__CODE_BLOCK_') || line.startsWith('<table>')) {
+            output.push(line);
+        } else if (line.length > 0) {
+            output.push(`<p>${line}</p>`);
+        }
+    }
+
+    if (inTable) {
+        tableHtml += '</tbody></table>';
+        output.push(tableHtml);
+    }
+    if (inList) {
+        output.push(`</${listType}>`);
+    }
+
+    let result = output.join('\n');
+
+    // 7. Restore code blocks
+    codeBlocks.forEach((block, idx) => {
+        result = result.replace(`__CODE_BLOCK_${idx}__`, block);
+    });
+
+    return result;
+}
+
 // Initialize App on DOM Load
 document.addEventListener('DOMContentLoaded', () => {
     renderHistoryList();
@@ -118,7 +298,12 @@ function appendMessageUI(role, content) {
     
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
-    bubble.textContent = content;
+    
+    if (role === 'user') {
+        bubble.textContent = content;
+    } else {
+        bubble.innerHTML = renderMarkdown(content);
+    }
 
     row.appendChild(avatar);
     row.appendChild(bubble);
@@ -198,7 +383,7 @@ async function handleFormSubmit(event) {
         });
 
         if (response.ok && response.body) {
-            aiBubble.textContent = "";
+            aiBubble.innerHTML = "";
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
@@ -207,7 +392,7 @@ async function handleFormSubmit(event) {
                 if (done) break;
                 const chunk = decoder.decode(value, { stream: true });
                 fullResponseText += chunk;
-                aiBubble.textContent = fullResponseText;
+                aiBubble.innerHTML = renderMarkdown(fullResponseText);
                 scrollChatToBottom();
             }
 
@@ -215,11 +400,11 @@ async function handleFormSubmit(event) {
             activeThread.messages.push({ role: 'assistant', content: fullResponseText });
             saveState();
         } else {
-            aiBubble.textContent = "Unable to connect to Digvijay's AI Avatar server. Please ensure the backend is running at http://127.0.0.1:8000.";
+            aiBubble.innerHTML = "<p>Unable to connect to Digvijay's AI Avatar server. Please ensure the backend is running at http://127.0.0.1:8000.</p>";
         }
     } catch (error) {
         console.error("API Fetch Error:", error);
-        aiBubble.textContent = "Connection error. Make sure FastAPI server is running (`uv run uvicorn main:app --reload`).";
+        aiBubble.innerHTML = "<p>Connection error. Make sure FastAPI server is running (<code>uv run uvicorn main:app --reload</code>).</p>";
     }
 }
 
