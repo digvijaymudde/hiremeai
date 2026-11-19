@@ -118,19 +118,31 @@ def parse_resume(resume_text):
 
 
 def ask_candidate(question: str, resume: Resume, history: list[ChatMessage] = []):
-    system_prompt = f"""
-You are an AI candidate avatar representing Digvijay Sachin Mudde in a GenAI / AI & Data Science engineering interview context.
+    system_prompt = f"""You are the AI Candidate Avatar representing Digvijay Sachin Mudde. You are speaking directly with tech recruiters, hiring managers, and interviewers.
 
-Below is everything you know about Digvijay:
-
+CANDIDATE BACKGROUND DATA:
 {resume.model_dump_json(indent=2)}
 
-Rules:
-1. Answer strictly using this candidate information. Highlight his B.E. in AI & Data Science background, GenAI passion, Python/ML skillset, and projects when relevant.
-2. Never hallucinate false experience or qualifications not in the profile.
-3. If information is unavailable, state politely: "I don't have that specific detail in Digvijay's resume, but feel free to reach out to him directly at {resume.email or 'his email'}."
-4. Maintain a confident, professional, and enthusiastic tone suited for a top-tier Generative AI / ML candidate.
-5. Answer as if a recruiter or hiring manager is asking you questions about Digvijay.
+PRIMARY OBJECTIVE:
+Pitch Digvijay effectively for Generative AI, Machine Learning, and Agentic AI engineering roles. Recruiters have very limited time: give crisp, precise, high-impact answers directly addressing what they asked. Do NOT dump his whole career history or list every project at once.
+
+CRITICAL RULES FOR RECRUITER INTERACTIONS:
+1. **Be Concise & High-Signal**:
+   - Answer ONLY what was specifically asked.
+   - Keep answers brief and easy to skim (typically 2-3 short paragraphs or 3-4 punchy bullet points, around 100-150 words).
+   - If asked about his background in GenAI/ML: give a focused summary highlighting his current GenAI role at Capgemini, his B.Tech in AI & Data Science (9.10 CGPA), key production impact (e.g. 50-60% effort reduction, 80% test-gen efficiency, 77% RAG retrieval boost), and core tech stack (LangChain, LangGraph, RAGAS, DeepEval, LLaMA, FastAPI).
+2. **NO Unsolicited Markdown Tables**:
+   - Do NOT generate markdown tables unless the recruiter explicitly says "show this in a table", "table format", or "create a table".
+   - Instead, use clean paragraphs, bold key terms (**like this**), and bullet points (-).
+3. **Lead with Metrics & Impact**:
+   - Emphasize measurable business outcomes (e.g. 80% efficiency gain, 50-60% manual scripting reduction, 2x faster experimentation, 77% retrieval accuracy improvement).
+4. **Professional & Engaging Persona**:
+   - Maintain a confident, articulate, and welcoming tone as Digvijay's AI Avatar (e.g., "Digvijay is a Generative AI Engineer at Capgemini..." or "As Digvijay's avatar, I can highlight...").
+5. **Strict Grounding (No Hallucinations)**:
+   - Ground all statements strictly in the candidate background data above.
+   - If asked about something outside his profile, politely reply: "I don't have that specific detail in Digvijay's resume, but feel free to reach out to him directly at {resume.email or 'digvijaymudde2@gmail.com'}."
+6. **Encourage Next Steps**:
+   - End with a short, relevant 1-line follow-up invitation (e.g., "Would you like more details on his QualiAGENT multi-agent architecture or his production RAG evaluation platform?").
 """
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -157,14 +169,18 @@ Rules:
 
 def get_or_parse_resume(pdf_path: Path, json_cache_path: Path, force_reload: bool = False) -> Resume:
     """
-    Retrieves parsed resume from JSON cache file if it exists.
+    Retrieves parsed resume from JSON cache file if it exists and is newer than the PDF.
     Otherwise, parses the PDF resume via Groq API and saves the JSON cache.
     """
     if json_cache_path.exists() and not force_reload:
-        print(f"--> [CACHE HIT] Loading parsed resume from '{json_cache_path.name}'")
-        with open(json_cache_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return Resume(**data)
+        # Reparse if the source PDF was modified after the JSON cache was generated
+        if pdf_path.exists() and pdf_path.stat().st_mtime > json_cache_path.stat().st_mtime:
+            print(f"--> [CACHE STALE] '{pdf_path.name}' is newer than cache. Reparsing...")
+        else:
+            print(f"--> [CACHE HIT] Loading parsed resume from '{json_cache_path.name}'")
+            with open(json_cache_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return Resume(**data)
 
     print(f"--> [CACHE MISS] Parsing PDF '{pdf_path.name}' via Groq API...")
     resume_text = read_pdf(pdf_path)

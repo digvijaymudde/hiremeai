@@ -11,6 +11,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Marked.js for GitHub Flavored Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="chatgpt-layout">
@@ -59,8 +62,8 @@
             <div class="detail-item">
                 <span class="detail-icon">🎓</span>
                 <div>
-                    <strong>B.E. AI & Data Science</strong>
-                    <div class="subtext">Dr. D. Y. Patil Institute (2020-2024)</div>
+                    <strong>B.Tech AI & Data Science</strong>
+                    <div class="subtext">Dr. D. Y. Patil Institute (9.10 CGPA)</div>
                 </div>
             </div>
             <div class="detail-item">
@@ -69,10 +72,10 @@
                     <strong>Key Skills</strong>
                     <div class="skills-mini-list">
                         <span class="mini-skill">Python</span>
-                        <span class="mini-skill">GenAI</span>
-                        <span class="mini-skill">ML</span>
-                        <span class="mini-skill">Django</span>
-                        <span class="mini-skill">Node.js</span>
+                        <span class="mini-skill">GenAI / LLMs</span>
+                        <span class="mini-skill">RAG</span>
+                        <span class="mini-skill">LangChain</span>
+                        <span class="mini-skill">FastAPI</span>
                     </div>
                 </div>
             </div>
@@ -84,7 +87,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 <span>Download Resume PDF</span>
             </a>
-            <a href="mailto:digvijaymudde123@gmail.com" class="btn btn-outline btn-full">
+            <a href="mailto:digvijaymudde2@gmail.com" class="btn btn-outline btn-full">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
                 <span>Contact Digvijay</span>
             </a>
@@ -134,10 +137,10 @@
                         <div class="card-desc">"What is Digvijay's background in GenAI and Machine Learning?"</div>
                     </button>
 
-                    <button class="prompt-card" onclick="sendPrompt('Tell me about your Car Price Prediction and Book Recommender projects.')">
+                    <button class="prompt-card" onclick="sendPrompt('Tell me about your QualiAGENT and RAG Evaluation Platform projects.')">
                         <div class="card-icon">🚀</div>
-                        <div class="card-title">Key Projects</div>
-                        <div class="card-desc">"Tell me about your Car Price Prediction & Book Recommender projects."</div>
+                        <div class="card-title">Key GenAI Projects</div>
+                        <div class="card-desc">"Tell me about your QualiAGENT and RAG Evaluation Platform projects."</div>
                     </button>
 
                     <button class="prompt-card" onclick="sendPrompt('What are your top technical skills and education details?')">
